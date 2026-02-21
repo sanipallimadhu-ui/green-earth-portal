@@ -68,7 +68,7 @@ function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  fetch("https://green-earth-portal.onrender.com/api/admin/login", {
+  fetch("/api/admin/login", {
     method:"POST",
     headers:{
       "Content-Type":"application/json"

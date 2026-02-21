@@ -284,7 +284,7 @@ function submitIssue() {
     formData.append("image", capturedImageBlob, "captured.png");
   }
 
-  fetch("https://green-earth-portal.onrender.com/api/reports", {
+  fetch("/api/reports", {
     method: "POST",
     body: formData
   })

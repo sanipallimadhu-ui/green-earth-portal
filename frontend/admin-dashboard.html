@@ -172,7 +172,7 @@ function logout(){
 // Load reports
 function loadReports() {
 
-  fetch("https://green-earth-portal.onrender.com/api/reports")
+  fetch("/api/reports")
     .then(res => res.json())
     .then(data => {
 
@@ -210,7 +210,7 @@ function loadReports() {
 
             <td>
               ${report.image
-                ? `<img src="https://green-earth-portal.onrender.com/uploads/${report.image}" width="60">`
+                ? `<img src="/uploads/${report.image}" width="60">`
                 : "No Image"}
             </td>
 
@@ -230,7 +230,7 @@ function loadReports() {
 // Update status
 function updateStatus(id, newStatus) {
 
-  fetch("https://green-earth-portal.onrender.com/api/reports/" + id, {
+  fetch("/api/reports" + id, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status: newStatus })
@@ -243,7 +243,7 @@ function deleteReport(id) {
 
   if(!confirm("Are you sure you want to delete this report?")) return;
 
-  fetch("https://green-earth-portal.onrender.com/api/reports/" + id, {
+  fetch("/api/reports" + id, {
     method: "DELETE"
   })
   .then(() => loadReports());

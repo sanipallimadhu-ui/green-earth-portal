@@ -29,7 +29,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 
 /* ---------- DEFAULT HOME PAGE ---------- */
-app.get("*", (req, res) => {
+app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/environment2html.html"));
 });
 

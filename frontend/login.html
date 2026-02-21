@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoVoice – Login / Register</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  background: linear-gradient(to bottom, #a8e063, #56ab2f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box {
+  width: 360px;
+  background: #ffffffcc;
+  backdrop-filter: blur(6px);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+h2 {
+  text-align: center;
+  color: #2e7d32;
+  margin-bottom: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #9ccc65;
+  outline: none;
+}
+
+input:focus {
+  border-color: #2e7d32;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(to right, #43a047, #2e7d32);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: linear-gradient(to right, #2e7d32, #1b5e20);
+}
+
+.link {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.link a {
+  color: #2e7d32;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  color: #1b5e20;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.msg {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <!-- LOGIN FORM -->
+  <div id="loginForm">
+    <h2>🌿 User Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email" required>
+    <input type="password" id="loginPassword" placeholder="Password" required>
+    <button onclick="loginUser()">Login</button>
+    <p id="msg" class="msg"></p>
+    <div class="link">
+      New user? <a onclick="showRegister()">Register here</a>
+    </div>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div id="registerForm" style="display:none;">
+    <h2>🌱 User Register</h2>
+    <input type="text" id="regUsername" placeholder="Username" required>
+    <input type="email" id="regEmail" placeholder="Email" required>
+    <input type="password" id="regPassword" placeholder="Password" required>
+    <button onclick="registerUser()">Register</button>
+    <p id="msgReg" class="msg"></p>
+    <div class="link">
+      Already have an account? <a onclick="showLogin()">Login</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    🌍 Environmental Issue Reporting Portal
+  </div>
+</div>
+
+<script>
+
+// Switch Forms
+function showRegister() {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("registerForm").style.display = "block";
+  document.getElementById("msg").innerText = "";
+}
+
+function showLogin() {
+  document.getElementById("registerForm").style.display = "none";
+  document.getElementById("loginForm").style.display = "block";
+  document.getElementById("msgReg").innerText = "";
+}
+
+// LOGIN FUNCTION
+async function loginUser() {
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const msg = document.getElementById("msg");
+
+  if (!email || !password) {
+    msg.style.color = "red";
+    msg.innerText = "Please enter email and password";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.style.color = "red";
+      msg.innerText = data.message || "Login failed";
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.innerText = "Login successful!";
+
+    // Save user
+    sessionStorage.setItem("user", JSON.stringify(data.user));
+
+    // 🔥 CHECK IF REDIRECT PARAM EXISTS
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect");
+
+    setTimeout(() => {
+
+      if (redirect === "events") {
+        window.location.href = "events.html";
+      } else {
+        window.location.href = "environment2html.html";
+      }
+
+    }, 1000);
+
+  } catch (err) {
+    console.error(err);
+    msg.style.color = "red";
+    msg.innerText = "Server not reachable";
+  }
+}
+
+// REGISTER FUNCTION
+async function registerUser() {
+
+  const username = document.getElementById("regUsername").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
+  const msg = document.getElementById("msgReg");
+
+  if (!username || !email || !password) {
+    msg.style.color = "red";
+    msg.innerText = "All fields are required!";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/users/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.style.color = "red";
+      msg.innerText = data.message || "Registration failed";
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.innerText = "Registration successful! Please login.";
+
+    setTimeout(showLogin, 1500);
+
+  } catch (err) {
+    console.error(err);
+    msg.style.color = "red";
+    msg.innerText = "Server not reachable";
+  }
+}
+
+</script>
+
+</body>
+</html>

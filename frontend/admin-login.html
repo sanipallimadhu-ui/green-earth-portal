@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Login</title>
+  <style>
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
+      url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e");
+      background-size:cover;
+      font-family:Arial;
+    }
+
+    .login-box{
+      background:white;
+      padding:30px;
+      width:350px;
+      border-radius:12px;
+      text-align:center;
+      box-shadow:0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    input{
+      width:100%;
+      padding:10px;
+      margin:10px 0;
+      border-radius:6px;
+      border:1px solid #aaa;
+    }
+
+    button{
+      width:100%;
+      padding:10px;
+      background:#2e7d32;
+      color:white;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#1b5e20;
+    }
+
+    .error{
+      color:red;
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>🌿 Admin Login</h2>
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
+  <button onclick="login()">Login</button>
+  <p class="error" id="msg"></p>
+</div>
+
+<script>
+function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  fetch("/api/admin/login", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body: JSON.stringify({ email, password })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.admin){
+      sessionStorage.setItem("admin", JSON.stringify(data.admin));
+      window.location.href="admin-dashboard.html";
+    }else{
+      document.getElementById("msg").innerText = data.message;
+    }
+  })
+  .catch(()=>{
+    document.getElementById("msg").innerText="Server not reachable";
+  });
+}
+</script>
+
+</body>
+</html>

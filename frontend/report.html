@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Green Earth Portal | Report Issue</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef6f0;
+    }
+
+    header {
+      background: #2c6e49;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header button {
+      background: white;
+      color: #2c6e49;
+      border: none;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .hero {
+      background-image: url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6");
+      background-size: cover;
+      background-position: center;
+      padding: 100px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .hero-content {
+      position: relative;
+    }
+
+    .btn {
+      background: green;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .section {
+      padding: 40px;
+      text-align: center;
+    }
+
+    .box {
+      background: white;
+      width: 420px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, textarea, select {
+      width: 95%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    video, img {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 250px;
+      border: 0;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      background: #2c6e49;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>🌍 Green Earth Portal</h2>
+  <button onclick="openReport()">Report Issue</button>
+</header>
+
+<div class="hero">
+  <div class="hero-content">
+    <h1>Protect Nature, Protect Life</h1>
+    <p>Together we can build a clean & green environment 🌱</p>
+    <button class="btn" onclick="openReport()">Report Environmental Issue</button>
+  </div>
+</div>
+
+<div class="section hidden" id="reportSection">
+  <h2>Report Environmental Issue</h2>
+
+  <div class="box">
+
+    <input type="text" id="title" placeholder="Issue Title">
+
+    <textarea rows="4" id="description" placeholder="Issue Description"></textarea>
+
+    <select id="category">
+      <option value="">Select Issue Category</option>
+      <option>Air Pollution</option>
+      <option>Water Pollution</option>
+      <option>Garbage Collection</option>
+      <option>Noise Pollution</option>
+      <option>Deforestation</option>
+      <option>Others</option>
+    </select>
+
+    <label><b>Upload Image</b></label>
+    <input type="file" id="image" accept="image/*">
+
+    <label><b>OR Capture Live Photo</b></label>
+    <video id="camera" autoplay class="hidden"></video>
+    <button class="btn" type="button" onclick="startCamera()">Open Camera</button>
+    <button class="btn" type="button" onclick="capturePhoto()">Capture Photo</button>
+    <img id="preview" class="hidden">
+
+    <label><b>Address / Location</b></label>
+<input type="text" id="address" placeholder="Detecting location..." readonly>
+
+<button class="btn" type="button" onclick="detectLocation()">Auto Detect Location</button>
+
+<iframe id="mapFrame"
+  src="https://maps.google.com/maps?q=India&z=5&output=embed">
+</iframe>
+
+    <button class="btn" onclick="submitIssue()">Submit Issue</button>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Green Earth Portal | Save Trees 🌱 Save Life</p>
+</footer>
+
+<script>
+function openReport() {
+  document.getElementById("reportSection").classList.remove("hidden");
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+let stream = null;
+let capturedImageBlob = null;
+
+function startCamera() {
+  const video = document.getElementById("camera");
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(s => {
+      stream = s;
+      video.srcObject = s;
+      video.classList.remove("hidden");
+    })
+    .catch(() => alert("Camera permission denied or not available"));
+}
+
+function capturePhoto() {
+  const video = document.getElementById("camera");
+  const preview = document.getElementById("preview");
+
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video, 0, 0);
+
+  canvas.toBlob(blob => {
+    capturedImageBlob = blob;
+  }, "image/png");
+
+  preview.src = canvas.toDataURL("image/png");
+  preview.classList.remove("hidden");
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+
+  video.classList.add("hidden");
+}
+
+function detectLocation() {
+
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported by your browser");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      // Update Google Map
+      document.getElementById("mapFrame").src =
+        `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+
+      // Convert coordinates to readable address using OpenStreetMap
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.display_name) {
+            document.getElementById("address").value = data.display_name;
+          } else {
+            document.getElementById("address").value = lat + ", " + lon;
+          }
+        });
+
+    },
+    function(error) {
+      alert("Location permission denied or unavailable.");
+    }
+  );
+}
+
+
+function submitIssue() {
+
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const category = document.getElementById("category").value;
+  const address = document.getElementById("address").value.trim();
+  const imageFile = document.getElementById("image").files[0];
+  const user = sessionStorage.getItem("user");
+
+  if (!user) {
+    alert("⚠ Please login first!");
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (!title || !description || !category || !address) {
+    alert("⚠ Please fill all required fields!");
+    return;
+  }
+
+  if (!imageFile && !capturedImageBlob) {
+    alert("⚠ Please upload or capture an image!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("description", description);
+  formData.append("category", category);
+  formData.append("address", address);
+
+  if (imageFile) {
+    formData.append("image", imageFile);
+  } else if (capturedImageBlob) {
+    formData.append("image", capturedImageBlob, "captured.png");
+  }
+
+  fetch("http://localhost:5000/api/reports", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("✅ Report submitted successfully!");
+    window.location.reload();
+  })
+  .catch(() => {
+    alert("❌ Failed to submit report");
+  });
+}
+</script>
+
+</body>
+</html>
